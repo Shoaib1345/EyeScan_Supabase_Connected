@@ -1,0 +1,36 @@
+{
+  "users": [
+    {
+      "id": "64d5320c-44bc-4a53-b2f9-9aae1fae234b",
+      "name": "Mazhar Younas",
+      "email": "f23ari30@aror.edu.pk",
+      "specialization": "",
+      "salt": "e7d156ac8bc3ba160a444baca8a076b8",
+      "hash": "f8dfe71857507c41f57da747c3bc97a969d19d13df8f7fc3b5a3f9a14d0860f3ec7385fb7d55debd6906db6b1fe44a84c9462da5a0b02f6f3b957ad847306a6b",
+      "createdAt": "2026-11-16T18:01:36.170Z"
+    },
+    {
+      "id": "3c0e612c-40f8-4657-96ba-05c7c83ca629",
+      "name": "Mazhar Younas",
+      "email": "mmazharyounas1@gmail.com",
+      "specialization": "",
+      "salt": "da554e794867ac447d6b63e03d9f438f",
+      "hash": "8b0f91904636070fa85c47c492a858e18db4f1b25f5c4515e19bf6135c5842f28761c44eaee90d4cc25da5080185b413c9da75796ab373ef890ed0683e901218",
+      "createdAt": "2026-11-16T18:09:28.331Z"
+    }
+  ],
+  "sessions": {
+    "4f8d4e9eff76795e4e366f5edcc28a2d39d3a6341a4d7c6b": "64d5320c-44bc-4a53-b2f9-9aae1fae234b"
+  },
+  "images": [
+    {
+      "id": "8284a07e-e689-41d1-83d7-039411d602eb",
+      "filename": "8284a07e-e689-41d1-83d7-039411d602eb.jpg",
+      "doctorId": "3c0e612c-40f8-4657-96ba-05c7c83ca629",
+      "label": "positive",
+      "note": "",
+      "size": 4796,
+      "createdAt": "2026-11-16T18:09:51.196Z"
+    }
+  ]
+}

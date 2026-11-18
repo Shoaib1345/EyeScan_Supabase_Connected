@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EyeLabel · Eye Image Labeling Portal</title>
+<link rel="stylesheet" href="/styles.css?v=spa1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e7490' stroke-width='2'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E">
+<style>
+/* view switching is controlled here inline so it never depends on cached CSS */
+.hidden-view { display: none !important; }
+</style>
+</head>
+<body>
+  <header class="brandbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+      </svg>
+      <div><h1>EyeLabel<small>Clinical Eye Image Labeling Portal</small></h1></div>
+    </div>
+    <div class="docinfo hidden-view" id="docinfo">
+      <div class="avatar" id="avatar">D</div>
+      <div>
+        <div id="docName" style="font-weight:700">…</div>
+        <div id="docSpec" style="font-size:11.5px; opacity:0.85"></div>
+      </div>
+      <button class="btn-logout" id="logoutBtn" type="button">Log out</button>
+    </div>
+  </header>
+
+  <!-- ============ SIGN IN VIEW ============ -->
+  <main class="auth-wrap" id="view-signin">
+    <div class="auth-card">
+      <div class="eye-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0e7490" stroke-width="1.6" stroke-linecap="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      </div>
+      <h2>Doctor Sign In</h2>
+      <p class="sub">Sign in to upload and label retinal / eye images</p>
+      <div id="signinAlert" class="alert"></div>
+      <form id="loginForm">
+        <div class="field">
+          <label for="liEmail">Email address</label>
+          <input id="liEmail" type="email" autocomplete="email" placeholder="dr.name@hospital.com" required>
+        </div>
+        <div class="field">
+          <label for="liPass">Password</label>
+          <input id="liPass" type="password" autocomplete="current-password" placeholder="••••••••" required>
+        </div>
+        <button class="btn-primary" type="submit">Sign In</button>
+      </form>
+      <p class="switch-auth">New doctor? <a href="#" id="toRegister">Create an account</a></p>
+    </div>
+  </main>
+
+  <!-- ============ REGISTER VIEW ============ -->
+  <main class="auth-wrap hidden-view" id="view-register">
+    <div class="auth-card">
+      <div class="eye-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0e7490" stroke-width="1.6" stroke-linecap="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>
+        </svg>
+      </div>
+      <h2>Doctor Registration</h2>
+      <p class="sub">Create your account to start labeling eye images</p>
+      <div id="regAlert" class="alert"></div>
+      <form id="regForm">
+        <div class="field">
+          <label for="rgName">Full name</label>
+          <input id="rgName" type="text" autocomplete="name" placeholder="Dr. Ayesha Khan" required>
+        </div>
+        <div class="field">
+          <label for="rgSpec">Specialization <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input id="rgSpec" type="text" placeholder="e.g. Ophthalmologist">
+        </div>
+        <div class="field">
+          <label for="rgEmail">Email address</label>
+          <input id="rgEmail" type="email" autocomplete="email" placeholder="dr.name@hospital.com" required>
+        </div>
+        <div class="field">
+          <label for="rgPass">Password <span style="color:var(--muted);font-weight:400">(min 6 characters)</span></label>
+          <input id="rgPass" type="password" autocomplete="new-password" placeholder="••••••••" minlength="6" required>
+        </div>
+        <button class="btn-primary" type="submit">Create Account</button>
+      </form>
+      <p class="switch-auth">Already registered? <a href="#" id="toSignin">Sign in</a></p>
+    </div>
+  </main>
+
+  <!-- ============ DASHBOARD VIEW ============ -->
+  <main class="container hidden-view" id="view-app">
+    <section class="stats">
+      <div class="stat">
+        <div class="dot dot-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div><div class="num" id="statTotal">0</div><div class="lbl">Total Images</div></div>
+      </div>
+      <div class="stat">
+        <div class="dot dot-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <div><div class="num" id="statNeg">0</div><div class="lbl">Negative (Healthy)</div></div>
+      </div>
+      <div class="stat">
+        <div class="dot dot-red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        </div>
+        <div><div class="num" id="statPos">0</div><div class="lbl">Positive (Disease)</div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>Upload Eye Image</h3>
+      <p class="hint">Upload a retinal / eye image and label it as <b>Positive</b> (disease present) or <b>Negative</b> (healthy).</p>
+      <div class="upload-grid">
+        <div class="dropzone" id="dropzone">
+          <div class="dz-inner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+            <p><b>Click to choose</b> or drag &amp; drop an eye image here</p>
+            <small>JPG, PNG or WEBP · max ~12 MB</small>
+          </div>
+          <img class="preview" id="preview" alt="Eye image preview">
+          <input type="file" id="fileInput" accept="image/*" hidden>
+        </div>
+
+        <div class="label-picker">
+          <div class="lp-title">2 · Choose label</div>
+          <div class="label-options">
+            <div class="label-opt neg" id="optNeg">
+              <div class="lo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+              <b>Negative</b>
+              <span>Healthy — no disease</span>
+            </div>
+            <div class="label-opt pos" id="optPos">
+              <div class="lo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+              <b>Positive</b>
+              <span>Disease detected</span>
+            </div>
+          </div>
+          <textarea class="note-input" id="note" placeholder="Optional note (e.g. suspected diabetic retinopathy)…" maxlength="300" rows="2"></textarea>
+          <button class="btn-primary" id="uploadBtn" type="button" disabled>Upload Labeled Image</button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="gallery-head">
+        <h3>My Uploaded Images</h3>
+        <div class="filters">
+          <button class="chip active" data-f="all" type="button">All</button>
+          <button class="chip" data-f="positive" type="button">Positive</button>
+          <button class="chip" data-f="negative" type="button">Negative</button>
+        </div>
+      </div>
+      <div id="gallery"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   EyeLabel single-page app.
+   Sign-in, registration and dashboard are views inside ONE page:
+   there is no navigation after login, so the session token — kept
+   in memory — can never be lost to cookieblocking or sandboxing.
+   localStorage / URL hash are only backups for page reloads.
+   ============================================================ */
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const KEY = 'eyelabel_sid';
+
+  let TOKEN = null;      // source of truth while this page is open
+  let USER = null;
+  let images = [];
+  let currentFilter = 'all';
+  let selectedLabel = null;
+  let selectedDataUrl = null;
+
+  /* ---------- optional persistence (best-effort) ---------- */
+  let store = null;
+  try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); store = localStorage; } catch (e) {}
+  if (!store) { try { sessionStorage.setItem('__t', '1'); sessionStorage.removeItem('__t'); store = sessionStorage; } catch (e) {} }
+
+  function saveToken(t) {
+    TOKEN = t || null;
+    try { if (t) { if (store) store.setItem(KEY, t); } else if (store) store.removeItem(KEY); } catch (e) {}
+    syncHash();
+  }
+  function storedToken() { try { return store ? store.getItem(KEY) : null; } catch (e) { return null; } }
+  function hashToken() { try { const m = (location.hash || '').match(/#sid=([A-Za-z0-9._~-]+)/); return m ? m[1] : null; } catch (e) { return null; } }
+  function syncHash() {
+    try { history.replaceState(null, '', location.pathname + (TOKEN ? '#sid=' + TOKEN : '')); } catch (e) {}
+  }
+
+  /* ---------- network layer with silent auto-retry ----------
+     Brief connection drops (flaky internet, proxy hiccups, sandbox
+     waking up) are retried automatically — the doctor only ever sees
+     a message if the connection is really unusable. */
+  async function fetchNet(url, opts, quiet) {
+    let lastErr = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try { return await fetch(url, opts); }
+      catch (e) {
+        lastErr = e;
+        if (attempt < 2) {
+          if (!quiet) showToast('Connection dropped — retrying…');
+          await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
+        }
+      }
+    }
+    const err = new Error('Could not reach the server. Please check your internet connection and try again in a few seconds.');
+    err.cause = lastErr;
+    throw err;
+  }
+
+  /* ---------- API helper ----------
+     Session token is attached to the URL (?sid=...) on every call —
+     the preview proxy strips Authorization headers and browsers block
+     iframe cookies, but a query parameter always survives. Header and
+     cookie are still sent as extra belt-and-braces. */
+  async function api(path, opts, quiet) {
+    opts = opts || {};
+    opts.headers = Object.assign({}, opts.headers || {});
+    let url = path;
+    if (TOKEN) {
+      opts.headers['Authorization'] = 'Bearer ' + TOKEN;
+      url += (url.includes('?') ? '&' : '?') + 'sid=' + encodeURIComponent(TOKEN);
+    }
+    const res = await fetchNet(url, opts, quiet);
+    let data = {};
+    try { data = await res.json(); } catch (e) {}
+    return { ok: res.ok, status: res.status, data: data };
+  }
+
+  /* ---------- views ---------- */
+  function showView(name) {
+    $('view-signin').classList.toggle('hidden-view', name !== 'signin');
+    $('view-register').classList.toggle('hidden-view', name !== 'register');
+    $('view-app').classList.toggle('hidden-view', name !== 'app');
+    $('docinfo').classList.toggle('hidden-view', name !== 'app');
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- session ---------- */
+  async function checkSession() {
+    try {
+      const r = await api('/api/me', {}, true);   // quiet — fetchNet retries internally
+      if (r.ok) { USER = r.data.user; if (r.data.token) TOKEN = TOKEN || r.data.token; return true; }
+      if (r.status === 401) return false;          // genuinely not signed in — no noisy message
+      showToast('Server hiccup (' + r.status + '). Please sign in again.');
+      return false;
+    } catch (e) {
+      showToast(e.message);
+      return false;
+    }
+  }
+
+  function enterApp() {
+    $('docName').textContent = USER.name;
+    $('docSpec').textContent = USER.specialization || USER.email;
+    $('avatar').textContent = (USER.name || 'D').trim().charAt(0).toUpperCase();
+    showView('app');
+    loadImages();
+  }
+
+  /* ---------- auth forms ---------- */
+  $('toRegister').addEventListener('click', (e) => { e.preventDefault(); showView('register'); });
+  $('toSignin').addEventListener('click', (e) => { e.preventDefault(); showView('signin'); });
+
+  $('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const alertBox = $('signinAlert');
+    alertBox.className = 'alert';
+    const btn = e.target.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    try {
+      const r = await api('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: $('liEmail').value, password: $('liPass').value }),
+      });
+      if (!r.ok) throw new Error(r.data.error || 'Sign in failed (status ' + r.status + ')');
+      saveToken(r.data.token);
+      USER = r.data.user;
+      showToast('✓ Welcome back, ' + (USER.name || 'Doctor'));
+      e.target.reset();
+      enterApp();
+    } catch (err) {
+      alertBox.textContent = err.message;
+      alertBox.className = 'alert error';
+    }
+    btn.textContent = 'Sign In';
+    btn.disabled = false;
+  });
+
+  $('regForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const alertBox = $('regAlert');
+    alertBox.className = 'alert';
+    const btn = e.target.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+    try {
+      const r = await api('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: $('rgName').value,
+          specialization: $('rgSpec').value,
+          email: $('rgEmail').value,
+          password: $('rgPass').value,
+        }),
+      });
+      if (!r.ok) throw new Error(r.data.error || 'Registration failed (status ' + r.status + ')');
+      if (r.data.needsConfirmation) {
+        const msg = r.data.message || 'Please verify your email, then sign in.';
+        alertBox.textContent = msg;
+        alertBox.className = 'alert success';
+        showView('signin');
+        showToast(msg);
+        return;
+      }
+      saveToken(r.data.token);
+      USER = r.data.user;
+      showToast('✓ Account created. Welcome, ' + (USER.name || 'Doctor'));
+      e.target.reset();
+      enterApp();
+    } catch (err) {
+      alertBox.textContent = err.message;
+      alertBox.className = 'alert error';
+    }
+    btn.textContent = 'Create Account';
+    btn.disabled = false;
+  });
+
+  $('logoutBtn').addEventListener('click', async () => {
+    try { await api('/api/logout', { method: 'POST' }); } catch (e) {}
+    saveToken(null);
+    USER = null;
+    images = [];
+    resetUploadForm();
+    showView('signin');
+    showToast('Signed out.');
+  });
+
+  /* ---------- image picking ---------- */
+  const dropzone = $('dropzone');
+  const fileInput = $('fileInput');
+  const preview = $('preview');
+  const optNeg = $('optNeg');
+  const optPos = $('optPos');
+  const uploadBtn = $('uploadBtn');
+
+  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('drag');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) pickFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) pickFile(fileInput.files[0]); });
+
+  function pickFile(file) {
+    if (!file.type.startsWith('image/')) { showToast('Please choose an image file.'); return; }
+    if (file.size > 12 * 1024 * 1024) { showToast('Image too large (max 12 MB).'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      selectedDataUrl = reader.result;
+      preview.src = selectedDataUrl;
+      dropzone.classList.add('has-image');
+      refreshUploadBtn();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  optNeg.addEventListener('click', () => setLabel('negative'));
+  optPos.addEventListener('click', () => setLabel('positive'));
+  function setLabel(l) {
+    selectedLabel = l;
+    optNeg.classList.toggle('selected', l === 'negative');
+    optPos.classList.toggle('selected', l === 'positive');
+    refreshUploadBtn();
+  }
+  function refreshUploadBtn() { uploadBtn.disabled = !(selectedDataUrl && selectedLabel); }
+
+  function resetUploadForm() {
+    selectedDataUrl = null; selectedLabel = null;
+    preview.src = '';
+    dropzone.classList.remove('has-image');
+    fileInput.value = '';
+    $('note').value = '';
+    optNeg.classList.remove('selected');
+    optPos.classList.remove('selected');
+    uploadBtn.textContent = 'Upload Labeled Image';
+    refreshUploadBtn();
+  }
+
+  /* ---------- upload ---------- */
+  uploadBtn.addEventListener('click', async () => {
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = 'Uploading…';
+    try {
+      const r = await api('/api/images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataUrl: selectedDataUrl, label: selectedLabel, note: $('note').value.trim() }),
+      });
+      if (!r.ok) {
+        if (r.status === 401) { sessionExpired(); return; }
+        throw new Error(r.data.error || 'Upload failed (status ' + r.status + ')');
+      }
+      showToast('✓ Image saved as ' + r.data.image.label.toUpperCase());
+      resetUploadForm();
+      loadImages();
+      return;
+    } catch (err) {
+      showToast(err.message);
+    }
+    uploadBtn.textContent = 'Upload Labeled Image';
+    refreshUploadBtn();
+  });
+
+  function sessionExpired() {
+    showToast('Your session expired — please sign in again.');
+    saveToken(null);
+    USER = null;
+    showView('signin');
+  }
+
+  /* ---------- gallery ---------- */
+  async function loadImages() {
+    let r;
+    try { r = await api('/api/images'); }
+    catch (e) { showToast('Could not load images (' + e.message + '). Please try again.'); return; }
+    if (!r.ok) { if (r.status === 401) sessionExpired(); return; }
+    images = r.data.images || [];
+    renderStats();
+    renderGallery();
+  }
+
+  function renderStats() {
+    const pos = images.filter((i) => i.label === 'positive').length;
+    const neg = images.filter((i) => i.label === 'negative').length;
+    $('statTotal').textContent = images.length;
+    $('statPos').textContent = pos;
+    $('statNeg').textContent = neg;
+  }
+
+  document.querySelectorAll('.chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentFilter = chip.dataset.f;
+      renderGallery();
+    });
+  });
+
+  function fileUrl(url) {
+    return TOKEN ? url + (url.includes('?') ? '&' : '?') + 'sid=' + encodeURIComponent(TOKEN) : url;
+  }
+
+  function renderGallery() {
+    const gallery = $('gallery');
+    const list = images.filter((i) => currentFilter === 'all' || i.label === currentFilter);
+    if (!list.length) {
+      gallery.innerHTML = '\n        <div class="panel empty">\n          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>\n          <p><b>No images yet.</b><br>Upload your first eye image above and label it.</p>\n        </div>';
+      return;
+    }
+    gallery.innerHTML = '<div class="grid">' + list.map(function (im) {
+      return '\n      <div class="card-img">\n        <img class="thumb" src="' + fileUrl(im.url) + '" alt="Eye image (' + im.label + ')" loading="lazy">\n        <span class="badge ' + im.label + '">' + im.label + '</span>\n        <div class="meta">\n          <span>' + escapeHtml(formatDate(im.createdAt)) + '</span>\n          <span>' + escapeHtml(formatSize(im.size)) + '</span>\n        </div>\n        ' + (im.note ? '<div class="note">' + escapeHtml(im.note) + '</div>' : '') + '\n      </div>';
+    }).join('') + '</div>';
+    gallery.querySelectorAll('.thumb').forEach((img) => {
+      img.addEventListener('error', () => {
+        const unavailable = document.createElement('div');
+        unavailable.className = 'thumb thumb-error';
+        unavailable.setAttribute('role', 'img');
+        unavailable.textContent = 'Image could not load. Check the file and access policy in Supabase Storage.';
+        img.replaceWith(unavailable);
+      }, { once: true });
+    });
+  }
+
+  /* ---------- utils ---------- */
+  const toast = $('toast');
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 4200);
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  }
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' +
+           d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+  function formatSize(bytes) {
+    if (!bytes) return '';
+    const mb = bytes / (1024 * 1024);
+    return mb >= 1 ? mb.toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB';
+  }
+
+  /* ---------- boot ---------- */
+  (async function boot() {
+    TOKEN = hashToken() || storedToken() || null;
+    if (!TOKEN) { showView('signin'); return; }
+    // we *might* already be signed in — verify without leaving the page
+    const ok = await checkSession();
+    if (ok) enterApp();
+    else { saveToken(null); showView('signin'); }
+  })();
+})();
+</script>
+</body>
+</html>
